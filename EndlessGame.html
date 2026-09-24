@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sunset City Urban Zombie Crisis - Elite Edition</title>
+    <!-- FontAwesome Pro / Free Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #2a101f;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            touch-action: none;
+        }
+        #ui {
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            right: 24px;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .stat-group {
+            display: flex;
+            gap: 16px;
+        }
+        .stat-box {
+            background: rgba(43, 23, 40, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 10px 20px;
+            border-radius: 14px;
+            border: 1px solid rgba(251, 146, 60, 0.4);
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            pointer-events: auto;
+        }
+        .stat-box i {
+            color: #fb923c;
+            font-size: 20px;
+        }
+        .stat-box span {
+            color: #fb923c;
+        }
+
+        /* Top Right Control Buttons (Pause & High Score trigger) */
+        .top-controls {
+            display: flex;
+            gap: 12px;
+            pointer-events: auto;
+        }
+        .btn-top {
+            background: rgba(43, 23, 40, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(251, 146, 60, 0.4);
+            color: #fff;
+            font-size: 18px;
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            transition: transform 0.05s ease, background 0.1s ease;
+        }
+        .btn-top i {
+            color: #fb923c;
+            font-size: 18px;
+        }
+        .btn-top:active {
+            transform: scale(0.95);
+            background: rgba(251, 146, 60, 0.3);
+        }
+
+        /* On-Screen Action Touch Controls */
+        #action-buttons {
+            position: absolute;
+            bottom: 32px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 32px;
+            z-index: 15;
+            pointer-events: none;
+        }
+        .control-pad {
+            display: flex;
+            gap: 14px;
+            pointer-events: auto;
+        }
+        .btn-action {
+            background: rgba(58, 29, 53, 0.9);
+            backdrop-filter: blur(8px);
+            border: 2px solid rgba(251, 146, 60, 0.4);
+            color: #fff;
+            font-size: 20px;
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            transition: transform 0.05s ease, background 0.1s ease;
+        }
+        .btn-action i {
+            color: #f1f5f9;
+        }
+        .btn-action:active {
+            transform: scale(0.9);
+            background: rgba(251, 146, 60, 0.3);
+        }
+        #shoot-btn {
+            background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+            border: 2px solid rgba(239, 68, 68, 0.7);
+            width: 86px;
+            height: 86px;
+            pointer-events: auto;
+            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4);
+        }
+        #shoot-btn i {
+            font-size: 32px;
+            color: #fff;
+        }
+        #shoot-btn:active {
+            transform: scale(0.9);
+        }
+
+        /* Generic Modal Dialogs & Loading Screen */
+        .modal-screen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(43, 23, 40, 0.96);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 38px 46px;
+            border-radius: 26px;
+            text-align: center;
+            color: #fff;
+            display: none;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(251, 146, 60, 0.4);
+            z-index: 25;
+            width: 88%;
+            max-width: 380px;
+        }
+        .modal-screen h1 {
+            margin: 0 0 12px 0;
+            color: #ef4444;
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .modal-screen p {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.75);
+            margin: 10px 0;
+        }
+        .modal-screen p span {
+            color: #fb923c;
+            font-weight: 700;
+        }
+        .modal-screen button {
+            background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
+            border: none;
+            padding: 16px 28px;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 14px;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+            box-shadow: 0 10px 25px rgba(251, 146, 60, 0.4);
+            transition: transform 0.1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .modal-screen button:active {
+            transform: scale(0.95);
+        }
+        .btn-secondary {
+            background: rgba(71, 85, 105, 0.8) !important;
+            margin-top: 10px !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        /* Loading Screen Specifics */
+        #loading-screen {
+            display: block;
+            z-index: 50;
+        }
+        .loading-bar-container {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            height: 14px;
+            margin: 24px 0 12px 0;
+            overflow: hidden;
+            border: 1px solid rgba(251, 146, 60, 0.3);
+        }
+        .loading-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #fb923c, #ef4444);
+            border-radius: 10px;
+            transition: width 0.1s linear;
+        }
+
+        /* Highest Score Display Box inside Modal */
+        .highest-score-card {
+            background: rgba(251, 146, 60, 0.1);
+            border: 1px solid rgba(251, 146, 60, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .highest-score-card i {
+            font-size: 36px;
+            color: #fb923c;
+            margin-bottom: 8px;
+        }
+        .highest-score-card h2 {
+            margin: 5px 0 0 0;
+            font-size: 26px;
+            color: #fb923c;
+            font-weight: 800;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="modal-screen">
+        <h1><i class="fa-solid fa-triangle-exclamation"></i> Sunset City</h1>
+        <p>Initializing Urban Crisis Assets...</p>
+        <div class="loading-bar-container">
+            <div id="loading-bar" class="loading-bar"></div>
+        </div>
+        <p style="font-size: 13px;" id="loading-status">Loading 0%</p>
+        <button id="start-btn" style="display: none;" onclick="startGameSession()"><i class="fa-solid fa-play"></i> Enter Crisis Zone</button>
+    </div>
+
+    <div id="ui">
+        <div class="stat-group">
+            <div class="stat-box"><i class="fa-solid fa-crosshairs"></i> <span id="killCount">0</span></div>
+            <div class="stat-box"><i class="fa-solid fa-star"></i> <span id="scoreCount">0</span></div>
+        </div>
+        <div class="top-controls">
+            <button class="btn-top" id="pause-btn" onclick="togglePause()"><i class="fa-solid fa-pause" id="pause-icon"></i></button>
+            <button class="btn-top" onclick="openHighScoreModal()"><i class="fa-solid fa-trophy"></i></button>
+        </div>
+    </div>
+
+    <!-- On-Screen Touch Controls -->
+    <div id="action-buttons">
+        <div class="control-pad">
+            <button class="btn-action" onclick="moveLeft()"><i class="fa-solid fa-chevron-left"></i></button>
+            <button class="btn-action" onclick="moveRight()"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+        <button class="btn-action" id="shoot-btn" onclick="shootGun()"><i class="fa-solid fa-fire"></i></button>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="gameover" class="modal-screen">
+        <h1><i class="fa-solid fa-skull-crossbones"></i> Crashed in City!</h1>
+        <p>Zombies Annihilated: <span id="finalKills">0</span></p>
+        <p>Final Score: <span id="finalScore">0</span></p>
+        <button onclick="restartGame()"><i class="fa-solid fa-rotate-right"></i> Try Again</button>
+        <button class="btn-secondary" onclick="openHighScoreModalFromGameOver()"><i class="fa-solid fa-trophy"></i> View Highest Score</button>
+    </div>
+
+    <!-- Pause Screen -->
+    <div id="pause-screen" class="modal-screen">
+        <h1><i class="fa-solid fa-circle-pause"></i> Game Paused</h1>
+        <p>Take a breather, operator.</p>
+        <button onclick="togglePause()"><i class="fa-solid fa-play"></i> Resume Game</button>
+        <button class="btn-secondary" onclick="restartGameFromPause()"><i class="fa-solid fa-rotate-right"></i> Restart</button>
+    </div>
+
+    <!-- Highest Score Screen -->
+    <div id="highscore-screen" class="modal-screen">
+        <h1><i class="fa-solid fa-award"></i> Highest Score</h1>
+        <div class="highest-score-card">
+            <i class="fa-solid fa-crown"></i>
+            <p style="margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.6);">All-Time Best Record</p>
+            <h2 id="highestScoreDisplay">Score: 0 | Kills: 0</h2>
+        </div>
+        <button onclick="closeHighScoreModal()"><i class="fa-solid fa-arrow-left"></i> Back</button>
+    </div>
+
+    <!-- Three.js Engine -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        // --- Web Audio API Synth Sound & Background Music Engine ---
+        let audioCtx = null;
+        let bgmInterval = null;
+        let isAudioInitialized = false;
+
+        function initAudio() {
+            if (isAudioInitialized) return;
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            audioCtx = new AudioContext();
+            isAudioInitialized = true;
+            startBackgroundMusic();
+        }
+
+        // Procedural Synthesized Sound Effects
+        function playSoundEffect(type) {
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            if (type === 'shoot') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(600, now);
+                osc.frequency.exponentialRampToValueAtTime(80, now + 0.15);
+                gainNode.gain.setValueAtTime(0.3, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                osc.start(now);
+                osc.stop(now + 0.15);
+            } else if (type === 'hit') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.exponentialRampToValueAtTime(40, now + 0.25);
+                gainNode.gain.setValueAtTime(0.4, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                osc.start(now);
+                osc.stop(now + 0.25);
+            } else if (type === 'gameover') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now);
+                osc.frequency.linearRampToValueAtTime(70, now + 0.8);
+                gainNode.gain.setValueAtTime(0.5, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
+                osc.start(now);
+                osc.stop(now + 0.8);
+            }
+        }
+
+        // Procedural Pulsing Action Background Music (BGM)
+        function startBackgroundMusic() {
+            if (bgmInterval) return;
+            const bassNotes = [110, 123.47, 130.81, 98.00];
+            let step = 0;
+
+            bgmInterval = setInterval(() => {
+                if (!audioCtx || isPaused || isGameOver || !gameStarted) return;
+                if (audioCtx.state === 'suspended') return;
+
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(bassNotes[step % bassNotes.length], now);
+
+                gain.gain.setValueAtTime(0.12, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.3);
+
+                step++;
+            }, 350);
+        }
+
+        // Scene Setup for Golden Sunset / Evening Horizon
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xfd5e53);
+        scene.fog = new THREE.FogExp2(0xfd5e53, 0.009);
+
+        const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.body.appendChild(renderer.domElement);
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Vibrant Evening Golden Hour Lighting
+        const ambientLight = new THREE.AmbientLight(0xffedd5, 1.3);
+        scene.add(ambientLight);
+
+        const sunLight = new THREE.DirectionalLight(0xffc285, 1.6);
+        sunLight.position.set(40, 50, 30);
+        sunLight.castShadow = true;
+        sunLight.shadow.mapSize.width = 1024;
+        sunLight.shadow.mapSize.height = 1024;
+        sunLight.shadow.camera.near = 0.5;
+        sunLight.shadow.camera.far = 160;
+        sunLight.shadow.camera.left = -22;
+        sunLight.shadow.camera.right = 22;
+        sunLight.shadow.camera.top = 22;
+        sunLight.shadow.camera.bottom = -22;
+        scene.add(sunLight);
+
+        // Game Constants & State Flags
+        const lanes = [-2.6, 0, 2.6];
+        let currentLane = 1;
+        let kills = 0;
+        let score = 0;
+        let gameSpeed = 0.72;
+        let isGameOver = false;
+        let isPaused = false;
+        let gameStarted = false;
+
+        // --- Loading Screen Simulation with Stuck / Stop Logic ---
+        let loadProgress = 0;
+        const loadingBar = document.getElementById('loading-bar');
+        const loadingStatus = document.getElementById('loading-status');
+        const startBtn = document.getElementById('start-btn');
+
+        const loadingInterval = setInterval(() => {
+            loadProgress += Math.floor(Math.random() * 12) + 5;
+            if (loadProgress >= 100) {
+                loadProgress = 100;
+                clearInterval(loadingInterval);
+                loadingStatus.innerText = "Assets Loaded Successfully!";
+                loadingBar.style.width = '100%';
+                startBtn.style.display = 'block';
+            } else {
+                loadingBar.style.width = loadProgress + '%';
+                loadingStatus.innerText = `Loading Assets... ${loadProgress}%`;
+            }
+        }, 120);
+
+        function startGameSession() {
+            initAudio();
+            document.getElementById('loading-screen').style.display = 'none';
+            gameStarted = true; // Unleashes the game loop only after clicking start!
+        }
+
+        // --- Highest Score Management with Score + Zombie Kills ---
+        let highestScoreData = JSON.parse(localStorage.getItem('sunset_city_highest_record')) || { score: 0, kills: 0 };
+
+        function checkAndUpdateHighestScore(currentScore, currentKills) {
+            if (currentScore > highestScoreData.score || (currentScore === highestScoreData.score && currentKills > highestScoreData.kills)) {
+                highestScoreData = { score: currentScore, kills: currentKills };
+                localStorage.setItem('sunset_city_highest_record', JSON.stringify(highestScoreData));
+            }
+        }
+
+        function openHighScoreModal() {
+            if (!gameStarted || isGameOver) return;
+            isPaused = true;
+            document.getElementById('highestScoreDisplay').innerText = `Score: ${highestScoreData.score} | Kills: ${highestScoreData.kills}`;
+            document.getElementById('highscore-screen').style.display = 'block';
+            document.getElementById('pause-screen').style.display = 'none';
+        }
+
+        function openHighScoreModalFromGameOver() {
+            document.getElementById('gameover').style.display = 'none';
+            document.getElementById('highestScoreDisplay').innerText = `Score: ${highestScoreData.score} | Kills: ${highestScoreData.kills}`;
+            document.getElementById('highscore-screen').style.display = 'block';
+        }
+
+        function closeHighScoreModal() {
+            document.getElementById('highscore-screen').style.display = 'none';
+            if (isGameOver) {
+                document.getElementById('gameover').style.display = 'block';
+            } else {
+                isPaused = false;
+            }
+        }
+
+        // --- Pause Logic ---
+        function togglePause() {
+            if (!gameStarted || isGameOver) return;
+            isPaused = !isPaused;
+            const pauseEl = document.getElementById('pause-screen');
+            const pauseIcon = document.getElementById('pause-icon');
+            if (isPaused) {
+                pauseEl.style.display = 'block';
+                pauseIcon.className = 'fa-solid fa-play';
+            } else {
+                pauseEl.style.display = 'none';
+                pauseIcon.className = 'fa-solid fa-pause';
+            }
+        }
+
+        function restartGameFromPause() {
+            togglePause();
+            restartGame();
+        }
+
+        // --- Styled Character: Special Ops Operator in Tactical Gear ---
+        const playerGroup = new THREE.Group();
+        scene.add(playerGroup);
+
+        const tacVestMat = new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.3, metalness: 0.5 });
+        const pantMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.6 });
+        const helmetMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.2, metalness: 0.8 });
+        const visorMat = new THREE.MeshBasicMaterial({ color: 0xfb923c });
+        const skinMat = new THREE.MeshStandardMaterial({ color: 0xffdbac, roughness: 0.6 });
+        const rifleMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.9, roughness: 0.2 });
+
+        const head = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.48, 0.48), skinMat);
+        head.position.y = 1.75;
+        playerGroup.add(head);
+
+        const helmet = new THREE.Mesh(new THREE.BoxGeometry(0.54, 0.35, 0.56), helmetMat);
+        helmet.position.set(0, 1.88, 0);
+        playerGroup.add(helmet);
+
+        const visor = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.12, 0.1), visorMat);
+        visor.position.set(0, 1.78, 0.25);
+        playerGroup.add(visor);
+
+        const torso = new THREE.Mesh(new THREE.BoxGeometry(0.64, 0.9, 0.35), tacVestMat);
+        torso.position.y = 1.15;
+        torso.castShadow = true;
+        playerGroup.add(torso);
+
+        const rifleBody = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.22, 0.9), rifleMat);
+        rifleBody.position.set(0.36, 1.25, 0.4);
+        playerGroup.add(rifleBody);
+
+        const rifleBarrel = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.5), rifleMat);
+        rifleBarrel.rotation.x = Math.PI / 2;
+        rifleBarrel.position.set(0.36, 1.28, 0.85);
+        playerGroup.add(rifleBarrel);
+
+        const armGeo = new THREE.BoxGeometry(0.18, 0.75, 0.18);
+        const legGeo = new THREE.BoxGeometry(0.2, 0.75, 0.2);
+        const bootGeo = new THREE.BoxGeometry(0.22, 0.16, 0.34);
+        const bootMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.4 });
+
+        const leftArm = new THREE.Mesh(armGeo, tacVestMat);
+        leftArm.position.set(-0.44, 1.15, 0);
+        playerGroup.add(leftArm);
+
+        const rightArm = new THREE.Mesh(armGeo, tacVestMat);
+        rightArm.position.set(0.44, 1.15, 0);
+        playerGroup.add(rightArm);
+
+        const leftLeg = new THREE.Mesh(legGeo, pantMat);
+        leftLeg.position.set(-0.16, 0.45, 0);
+        playerGroup.add(leftLeg);
+
+        const rightLeg = new THREE.Mesh(legGeo, pantMat);
+        rightLeg.position.set(0.16, 0.45, 0);
+        playerGroup.add(rightLeg);
+
+        const leftBoot = new THREE.Mesh(bootGeo, bootMat);
+        leftBoot.position.set(0, -0.38, 0.05);
+        leftLeg.add(leftBoot);
+
+        const rightBoot = new THREE.Mesh(bootGeo, bootMat);
+        rightBoot.position.set(0, -0.38, 0.05);
+        rightLeg.add(rightBoot);
+
+        playerGroup.position.set(lanes[currentLane], 0, 0);
+        let runAnimationTimer = 0;
+
+        // --- Bullets & Blood Effects ---
+        const bullets = [];
+        const bloodParticles = [];
+
+        function shootGun() {
+            if (!gameStarted || isGameOver || isPaused) return;
+            playSoundEffect('shoot');
+            const bulletGeo = new THREE.SphereGeometry(0.12, 8, 8);
+            const bulletMat = new THREE.MeshBasicMaterial({ color: 0xfb923c });
+            const bullet = new THREE.Mesh(bulletGeo, bulletMat);
+            bullet.position.set(playerGroup.position.x + 0.36, 1.25, playerGroup.position.z - 0.6);
+            scene.add(bullet);
+            bullets.push(bullet);
+        }
+
+        function createBloodExplosion(x, y, z) {
+            playSoundEffect('hit');
+            const bloodMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+            for (let i = 0; i < 20; i++) {
+                const pGeo = new THREE.BoxGeometry(0.13, 0.13, 0.13);
+                const particle = new THREE.Mesh(pGeo, bloodMat);
+                particle.position.set(x, y + 1.8, z);
+                
+                let vx = (Math.random() - 0.5) * 0.35;
+                let vy = Math.random() * 0.35;
+                let vz = (Math.random() - 0.5) * 0.35;
+
+                scene.add(particle);
+                bloodParticles.push({ mesh: particle, vx, vy, vz, life: 32 });
+            }
+        }
+
+        // --- High-Resolution Realistic Procedural Textures ---
+        function createBusTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+
+            const grad = ctx.createLinearGradient(0, 50, 0, 190);
+            grad.addColorStop(0, '#fbbf24');
+            grad.addColorStop(0.5, '#f59e0b');
+            grad.addColorStop(1, '#b45309');
+            ctx.fillStyle = grad;
+            ctx.fillRect(20, 50, 984, 320);
+
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+            ctx.fillRect(20, 50, 984, 30);
+
+            ctx.strokeStyle = '#78350f';
+            ctx.lineWidth = 6;
+            ctx.strokeRect(20, 50, 984, 320);
+
+            ctx.fillStyle = '#0f172a';
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 4;
+            for (let i = 60; i < 820; i += 130) {
+                ctx.fillRect(i, 90, 100, 120);
+                ctx.strokeRect(i, 90, 100, 120);
+            }
+            ctx.fillRect(840, 90, 140, 200);
+            ctx.strokeRect(840, 90, 140, 200);
+
+            ctx.fillStyle = '#fef08a';
+            ctx.beginPath();
+            ctx.arc(980, 130, 24, 0, Math.PI * 2);
+            ctx.arc(980, 290, 24, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#0f172a';
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 12;
+            ctx.beginPath();
+            ctx.arc(220, 370, 75, 0, Math.PI * 2);
+            ctx.arc(800, 370, 75, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#94a3b8';
+            ctx.beginPath();
+            ctx.arc(220, 370, 28, 0, Math.PI * 2);
+            ctx.arc(800, 370, 28, 0, Math.PI * 2);
+            ctx.fill();
+
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        function createZombieTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 1024;
+            const ctx = canvas.getContext('2d');
+
+            const skinGrad = ctx.createLinearGradient(0, 50, 0, 950);
+            skinGrad.addColorStop(0, '#4d7c0f');
+            skinGrad.addColorStop(0.4, '#365314');
+            skinGrad.addColorStop(1, '#1a2e05');
+            ctx.fillStyle = skinGrad;
+
+            ctx.fillRect(128, 250, 256, 450);
+            ctx.fillRect(160, 80, 192, 180);
+
+            ctx.fillStyle = '#ef4444';
+            ctx.shadowColor = '#ef4444';
+            ctx.shadowBlur = 18;
+            ctx.fillRect(190, 130, 40, 25);
+            ctx.fillRect(282, 130, 40, 25);
+            ctx.shadowBlur = 0;
+
+            ctx.fillStyle = '#1e1b4b';
+            ctx.fillRect(128, 320, 256, 120);
+
+            ctx.fillStyle = '#3f6212';
+            ctx.fillRect(30, 280, 80, 480);
+            ctx.fillRect(402, 280, 80, 480);
+
+            ctx.fillStyle = '#142204';
+            ctx.fillRect(144, 700, 100, 280);
+            ctx.fillRect(268, 700, 100, 280);
+
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        const busTexture = createBusTexture();
+        const zombieTexture = createZombieTexture();
+
+        // --- City Environment ---
+        const cityGroup = new THREE.Group();
+        scene.add(cityGroup);
+
+        function createSkyscraper(x, z, width, height, depth, colorHex) {
+            const bldgMat = new THREE.MeshStandardMaterial({ color: colorHex, roughness: 0.3, metalness: 0.4 });
+            const building = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), bldgMat);
+            building.position.set(x, height / 2, z);
+            building.castShadow = true;
+            building.receiveShadow = true;
+            return building;
+        }
+
+        function createBusObstacle(x, z) {
+            const mat = new THREE.MeshBasicMaterial({ map: busTexture, transparent: true });
+            const mesh = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 2.3), mat);
+            const busGroup = new THREE.Group();
+            
+            mesh.position.y = 1.15;
+            busGroup.add(mesh);
+            
+            const backMesh = mesh.clone();
+            backMesh.rotation.y = Math.PI;
+            busGroup.add(backMesh);
+
+            busGroup.position.set(x, 0, z);
+            return busGroup;
+        }
+
+        function createTruckObstacle(x, z) {
+            const truckGroup = new THREE.Group();
+            const cabMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.3, metalness: 0.5 });
+            const cargoMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.6 });
+            const wheelMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 });
+
+            const cab = new THREE.Mesh(new THREE.BoxGeometry(2.1, 2.0, 2.2), cabMat);
+            cab.position.set(0, 1.1, 1.5);
+            cab.castShadow = true;
+            truckGroup.add(cab);
+
+            const cargo = new THREE.Mesh(new THREE.BoxGeometry(2.2, 2.5, 4.2), cargoMat);
+            cargo.position.set(0, 1.35, -1.0);
+            cargo.castShadow = true;
+            truckGroup.add(cargo);
+
+            [-1.15, 1.15].forEach(wx => {
+                [-1.8, 0.2, 1.8].forEach(wz => {
+                    const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 0.4, 12), wheelMat);
+                    wheel.rotation.z = Math.PI / 2;
+                    wheel.position.set(wx, 0.45, wz);
+                    truckGroup.add(wheel);
+                });
+            });
+
+            truckGroup.position.set(x, 0, z);
+            return truckGroup;
+        }
+
+        function createCitySegment(zPos) {
+            const segment = new THREE.Group();
+            segment.position.z = zPos;
+
+            const roadMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.85 });
+            const road = new THREE.Mesh(new THREE.PlaneGeometry(36, 180), roadMat);
+            road.rotation.x = -Math.PI / 2;
+            road.position.y = -0.05;
+            segment.add(road);
+
+            const sidewalkMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.8 });
+            [-11, 11].forEach(sx => {
+                const sidewalk = new THREE.Mesh(new THREE.PlaneGeometry(6, 180), sidewalkMat);
+                sidewalk.rotation.x = -Math.PI / 2;
+                sidewalk.position.set(sx, -0.03, 0);
+                segment.add(sidewalk);
+            });
+
+            for (let z = -80; z < 90; z += 35) {
+                segment.add(createSkyscraper(-22, z, 14, 55 + Math.random() * 35, 16, 0x475569));
+                segment.add(createSkyscraper(22, z + 15, 15, 60 + Math.random() * 40, 16, 0x334155));
+            }
+
+            cityGroup.add(segment);
+            return segment;
+        }
+
+        let citySegments = [
+            createCitySegment(0),
+            createCitySegment(-180),
+            createCitySegment(-360)
+        ];
+
+        // --- Bigfoot Zombies ---
+        const entities = [];
+
+        function createBigfootZombie() {
+            const zGroup = new THREE.Group();
+            const mat = new THREE.MeshBasicMaterial({ map: zombieTexture, transparent: true });
+            
+            const frontMesh = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 3.8), mat);
+            frontMesh.position.y = 1.9;
+            zGroup.add(frontMesh);
+
+            const backMesh = frontMesh.clone();
+            backMesh.rotation.y = Math.PI;
+            zGroup.add(backMesh);
+
+            zGroup.userData = { isZombie: true, animOffset: Math.random() * Math.PI * 2 };
+            return zGroup;
+        }
+
+        function spawnEntityChunk(zPos) {
+            let chosenLane = Math.floor(Math.random() * 3);
+            let randType = Math.random();
+
+            let entityObj;
+            if (randType < 0.6) {
+                let mesh = createBigfootZombie();
+                mesh.position.set(lanes[chosenLane], 0, zPos);
+                scene.add(mesh);
+                entityObj = { type: 'zombie', mesh: mesh, lane: chosenLane };
+            } else if (randType < 0.8) {
+                let mesh = createBusObstacle(lanes[chosenLane], zPos);
+                scene.add(mesh);
+                entityObj = { type: 'obstacle', mesh: mesh, lane: chosenLane };
+            } else {
+                let mesh = createTruckObstacle(lanes[chosenLane], zPos);
+                scene.add(mesh);
+                entityObj = { type: 'obstacle', mesh: mesh, lane: chosenLane };
+            }
+            entities.push(entityObj);
+        }
+
+        for (let z = -60; z > -450; z -= 35) {
+            spawnEntityChunk(z);
+        }
+
+        // --- Movement Controls ---
+        function moveLeft() {
+            if (!gameStarted || isGameOver || isPaused) return;
+            if (currentLane > 0) currentLane--;
+        }
+
+        function moveRight() {
+            if (!gameStarted || isGameOver || isPaused) return;
+            if (currentLane < 2) currentLane++;
+        }
+
+        window.addEventListener('keydown', e => {
+            if (!gameStarted || isGameOver || isPaused) return;
+            if (e.code === 'ArrowLeft' || e.code === 'KeyA') moveLeft();
+            if (e.code === 'ArrowRight' || e.code === 'KeyD') moveRight();
+            if (e.code === 'Space' || e.code === 'KeyW') shootGun();
+            if (e.code === 'KeyP') togglePause();
+        });
+
+        function restartGame() {
+            isGameOver = false;
+            isPaused = false;
+            gameStarted = true;
+            kills = 0;
+            score = 0;
+            gameSpeed = 0.72;
+            currentLane = 1;
+
+            document.getElementById('pause-icon').className = 'fa-solid fa-pause';
+            document.getElementById('pause-screen').style.display = 'none';
+            document.getElementById('gameover').style.display = 'none';
+
+            entities.forEach(en => scene.remove(en.mesh));
+            entities.length = 0;
+            bullets.forEach(b => scene.remove(b));
+            bullets.length = 0;
+
+            for (let z = -60; z > -450; z -= 35) {
+                spawnEntityChunk(z);
+            }
+
+            playerGroup.position.set(lanes[currentLane], 0, 0);
+        }
+
+        // --- Main Game Loop ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (gameStarted && !isGameOver && !isPaused) {
+                let targetX = lanes[currentLane];
+                playerGroup.position.x += (targetX - playerGroup.position.x) * 0.22;
+
+                runAnimationTimer += gameSpeed * 0.45;
+                leftArm.rotation.x = Math.sin(runAnimationTimer) * 0.85;
+                rightArm.rotation.x = -Math.sin(runAnimationTimer) * 0.85;
+                leftLeg.rotation.x = -Math.sin(runAnimationTimer) * 0.85;
+                rightLeg.rotation.x = Math.sin(runAnimationTimer) * 0.85;
+
+                for (let i = bullets.length - 1; i >= 0; i--) {
+                    bullets[i].position.z -= 2.1;
+                    if (bullets[i].position.z < -120) {
+                        scene.remove(bullets[i]);
+                        bullets.splice(i, 1);
+                    }
+                }
+
+                for (let i = bloodParticles.length - 1; i >= 0; i--) {
+                    let bp = bloodParticles[i];
+                    bp.mesh.position.x += bp.vx;
+                    bp.mesh.position.y += bp.vy;
+                    bp.mesh.position.z += bp.vz;
+                    bp.vy -= 0.022;
+                    bp.life--;
+                    if (bp.life <= 0) {
+                        scene.remove(bp.mesh);
+                        bloodParticles.splice(i, 1);
+                    }
+                }
+
+                let time = Date.now() * 0.008;
+                for (let i = entities.length - 1; i >= 0; i--) {
+                    let ent = entities[i];
+                    ent.mesh.position.z += gameSpeed;
+
+                    if (ent.type === 'zombie') {
+                        let offset = ent.mesh.userData.animOffset || 0;
+                        ent.mesh.rotation.z = Math.sin(time + offset) * 0.18;
+                        ent.mesh.position.y = Math.abs(Math.sin(time * 2 + offset)) * 0.25;
+                    }
+
+                    if (ent.lane === currentLane) {
+                        let dist = Math.abs(ent.mesh.position.z - playerGroup.position.z);
+                        let collisionThreshold = ent.type === 'obstacle' ? 2.2 : 1.4;
+                        if (dist < collisionThreshold) {
+                            triggerGameOver();
+                        }
+                    }
+
+                    if (ent.type === 'zombie') {
+                        for (let b = bullets.length - 1; b >= 0; b--) {
+                            let bDist = Math.hypot(
+                                bullets[b].position.x - ent.mesh.position.x,
+                                bullets[b].position.z - ent.mesh.position.z
+                            );
+
+                            if (bDist < 1.2) {
+                                createBloodExplosion(ent.mesh.position.x, ent.mesh.position.y, ent.mesh.position.z);
+                                scene.remove(ent.mesh);
+                                entities.splice(i, 1);
+
+                                scene.remove(bullets[b]);
+                                bullets.splice(b, 1);
+
+                                kills++;
+                                score += 150;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                citySegments.forEach(seg => {
+                    seg.position.z += gameSpeed;
+                    if (seg.position.z > 180) {
+                        seg.position.z -= 540;
+                    }
+                });
+
+                if (entities.length > 0 && entities[entities.length - 1].mesh.position.z > -100) {
+                    spawnEntityChunk(entities[entities.length - 1].mesh.position.z - 35);
+                }
+
+                score += Math.floor(gameSpeed * 3);
+                gameSpeed += 0.00018;
+
+                document.getElementById('killCount').innerText = kills;
+                document.getElementById('scoreCount').innerText = score;
+            }
+
+            camera.position.x = playerGroup.position.x * 0.35;
+            camera.position.y = 3.6;
+            camera.position.z = playerGroup.position.z + 7.5;
+            camera.lookAt(playerGroup.position.x, playerGroup.position.y + 0.9, playerGroup.position.z - 3);
+
+            renderer.render(scene, camera);
+        }
+
+        function triggerGameOver() {
+            isGameOver = true;
+            playSoundEffect('gameover');
+            checkAndUpdateHighestScore(score, kills);
+            document.getElementById('finalKills').innerText = kills;
+            document.getElementById('finalScore').innerText = score;
+            document.getElementById('gameover').style.display = 'block';
+        }
+
+        animate();
+    </script>
+</body>
+</html>
